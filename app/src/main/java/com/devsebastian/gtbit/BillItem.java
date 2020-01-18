@@ -14,6 +14,8 @@ public class BillItem {
         this.cost = cost;
     }
 
+    public BillItem(){}
+
     public String getTitle() {
         return title;
     }
