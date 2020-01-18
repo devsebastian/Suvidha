@@ -26,14 +26,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -47,7 +39,7 @@ import android.widget.TextView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     ImageView saveLocationBtn, lastSavedSpotBtn;
@@ -83,9 +75,8 @@ public class MainActivity extends AppCompatActivity{
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId())
-                {
-                    case R.id.send_sos :
+                switch (item.getItemId()) {
+                    case R.id.send_sos:
                         final long date = System.currentTimeMillis();
 
                         client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
@@ -130,8 +121,8 @@ public class MainActivity extends AppCompatActivity{
                 client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        if(location != null){
-                            Log.d("Location", "onSuccess: Latitude " + location.getLatitude() );
+                        if (location != null) {
+                            Log.d("Location", "onSuccess: Latitude " + location.getLatitude());
                             userLat = location.getLatitude();
                             userLng = location.getLongitude();
                             databaseReference.child("parkedLocation").child("1").child("lat").setValue(userLat);
@@ -149,10 +140,9 @@ public class MainActivity extends AppCompatActivity{
         databaseReference.child("parkedLocation").child("1").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.exists()){
+                if (!dataSnapshot.exists()) {
                     lastSavedSpotBtn.setVisibility(View.GONE);
-                }
-                else
+                } else
                     lastSavedSpotBtn.setVisibility(View.VISIBLE);
             }
 
@@ -165,7 +155,7 @@ public class MainActivity extends AppCompatActivity{
         lastSavedSpotBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this,MapActivity.class));
+                startActivity(new Intent(MainActivity.this, MapActivity.class));
             }
         });
     }
@@ -185,7 +175,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
-                startActivity(new Intent(MainActivity.this,MapActivity.class));
+                startActivity(new Intent(MainActivity.this, MapActivity.class));
             }
         });
 
