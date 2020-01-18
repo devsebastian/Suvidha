@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,10 +40,14 @@ import android.widget.TextView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     ImageView saveLocationBtn, lastSavedSpotBtn;
+
+    String shopName;
 
     private Double userLat = 0d, userLng = 0d;
 
@@ -158,6 +163,125 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, MapActivity.class));
             }
         });
+
+
+        RecyclerView recyclerView = findViewById(R.id.feed_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+//        items.add(new Item("Adidas Vipers", "25% OFF", "https://cdn.dribbble.com/users/665292/screenshots/2647235/adidas.png", 2300, 12));
+//        items.add(new Item("Reebok Vipers", "25% OFF", "", 2300, 12));
+//        items.add(new Item("Bata tata", "25% OFF", "", 1200, 12));
+//        items.add(new Item("Chinese Maal", "25% OFF", "", 2300, 12));
+//        rows.add(new FeedRow("Adidas", items));
+//
+//        ArrayList<Item> items2 = new ArrayList<>();
+//        items2.add(new Item("Adidas Vipers", "25% OFF", "https://cdn.dribbble.com/users/665292/screenshots/2647235/adidas.png", 2300, 12));
+//        items2.add(new Item("Reebok Vipers", "25% OFF", "", 2300, 12));
+//        items2.add(new Item("Bata tata", "25% OFF", "", 2300, 12));
+//        items2.add(new Item("Chinese Maal", "25% OFF", "", 2400, 12));
+//        rows.add(new FeedRow("Reebok", items2));
+
+
+        FirebaseDatabase.getInstance().getReference().child("shops").child("1").child("1").child("name").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                shopName = dataSnapshot.getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        final FeedAdapter feedAdapter = new FeedAdapter(this, new ArrayList<FeedRow>());
+
+        final ArrayList<FeedRow> feedRows = new ArrayList<>();
+
+//        FirebaseDatabase.getInstance().getReference().child("shops").child("1").child("1").addValueEventListener(new ValueEventListener() {
+//            final ArrayList<Item> items = new ArrayList<>();
+//
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                shopName = dataSnapshot.child("name").getValue(String.class);
+//
+//                for (DataSnapshot snapshot : dataSnapshot.child("items").getChildren()) {
+//                    final Integer id = snapshot.child("id").getValue(Integer.class);
+//
+//                    FirebaseDatabase.getInstance().getReference().child("items").child(id.toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                            Item item = new Item();
+//                            item.setId(id);
+//                            item.setTitle(dataSnapshot.child("name").getValue(String.class));
+//                            item.setCost(dataSnapshot.child("Price").getValue(Integer.class));
+//                            item.setImgUrl(dataSnapshot.child("imgurl").getValue(String.class));
+//                            items.add(item);
+//                            feedAdapter.setItems(feedRows);
+//                            feedAdapter.notifyDataSetChanged();
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                        }
+//                    });
+//                }
+//                feedRows.add(new FeedRow(shopName, items));
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+
+        FirebaseDatabase.getInstance().getReference().child("shops").child("1").addValueEventListener(new ValueEventListener() {
+            final ArrayList<Item> items = new ArrayList<>();
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot1) {
+                for (DataSnapshot dataSnapshot : dataSnapshot1.getChildren()) {
+                    shopName = dataSnapshot.child("name").getValue(String.class);
+
+                    for (DataSnapshot snapshot : dataSnapshot.child("items").getChildren()) {
+                        final Integer id = snapshot.child("id").getValue(Integer.class);
+                        final String deal = snapshot.child("deal").getValue(String.class);
+
+
+                        FirebaseDatabase.getInstance().getReference().child("items").child(id.toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                Item item = new Item();
+                                item.setId(id);
+                                item.setDeal(deal);
+                                Log.d
+                                item.setTitle(dataSnapshot.child("name").getValue(String.class));
+                                item.setCost(dataSnapshot.child("Price").getValue(Integer.class));
+                                item.setImgUrl(dataSnapshot.child("imgurl").getValue(String.class));
+                                items.add(item);
+                                feedAdapter.setItems(feedRows);
+                                feedAdapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                    feedRows.add(new FeedRow(shopName, items));
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        recyclerView.setAdapter(feedAdapter);
     }
 
 
