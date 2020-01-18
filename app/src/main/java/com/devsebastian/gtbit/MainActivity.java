@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import androidx.core.app.ActivityCompat;
 
@@ -88,18 +89,14 @@ public class MainActivity extends AppCompatActivity{
                 switch (item.getItemId())
                 {
                     case R.id.send_sos :
-                        Calendar calendar = Calendar.getInstance();
-                        int day = calendar.get(Calendar.DAY_OF_MONTH);
-                        int month = calendar.get(Calendar.MONTH);
-                        int year = calendar.get(Calendar.YEAR);
-
-                        final String date = day + "/" + month + "/" + year;
+                        final long date = System.currentTimeMillis();
 
                         client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
-                                databaseReference.child("sosDetails").child("1").child(date).child("lat").setValue(location.getLatitude());
-                                databaseReference.child("sosDetails").child("1").child(date).child("lng").setValue(location.getLongitude());
+                                databaseReference.child("sosDetails").child("1").child("date").setValue(date);
+                                databaseReference.child("sosDetails").child("1").child("lat").setValue(location.getLatitude());
+                                databaseReference.child("sosDetails").child("1").child("lng").setValue(location.getLongitude());
 
                                 Dialog dialog = onCreateDialogSOS();
                                 dialog.show();
