@@ -45,7 +45,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-    ImageView saveLocationBtn, lastSavedSpotBtn;
+    ImageView saveLocationBtn, lastSavedSpotBtn, profileBtn;
 
     String shopName;
 
@@ -114,6 +114,14 @@ public class MainActivity extends AppCompatActivity {
 
         saveLocationBtn = findViewById(R.id.save_location_btn);
         lastSavedSpotBtn = findViewById(R.id.find_last_spot);
+        profileBtn = findViewById(R.id.profile);
+
+        profileBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+            }
+        });
 
         saveLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override

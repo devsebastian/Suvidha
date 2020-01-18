@@ -91,6 +91,7 @@
                 android:layout_weight="1" />
 
             <ImageView
+                android:id="@+id/profile"
                 android:layout_width="0dp"
                 android:src="@drawable/account"
                 android:layout_height="match_parent"
