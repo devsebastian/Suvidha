@@ -26,7 +26,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
 
     Context context;
 
-    void setItems(ArrayList<Item> items){
+    void setItems(ArrayList<Item> items) {
         this.items = items;
     }
 
@@ -62,20 +62,21 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final Item item = items.get(position);
 
-        databaseReference.child("items").child(item.getId().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                holder.title.setText(item.getTitle());
-                holder.deal.setText(item.getDeal());
-                holder.cost.setText("₹ " + item.getCost());
-                Glide.with(context).load(item.getImgUrl()).into(holder.image);
-            }
+        if (item.getId() != null)
+            databaseReference.child("items").child(item.getId().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    holder.title.setText(item.getTitle());
+                    holder.deal.setText(item.getDeal());
+                    holder.cost.setText("₹ " + item.getCost());
+                    Glide.with(context).load(item.getImgUrl()).into(holder.image);
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
     }
 
 
