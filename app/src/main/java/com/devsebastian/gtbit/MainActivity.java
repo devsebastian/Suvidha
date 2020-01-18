@@ -1,16 +1,28 @@
 package com.devsebastian.gtbit;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -19,6 +31,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -35,13 +49,14 @@ import android.widget.TextView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-    Button saveLocationBtn;
-    LocationManager locationManager;
+    Button saveLocationBtn, lastSavedSpotBtn;
 
     private Double userLat = 0d, userLng = 0d;
+
+    private FusedLocationProviderClient client;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -64,6 +79,40 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.toolbar_menu);
+
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId())
+                {
+                    case R.id.send_sos :
+                        Calendar calendar = Calendar.getInstance();
+                        int day = calendar.get(Calendar.DAY_OF_MONTH);
+                        int month = calendar.get(Calendar.MONTH);
+                        int year = calendar.get(Calendar.YEAR);
+
+                        final String date = day + "/" + month + "/" + year;
+
+                        client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                databaseReference.child("sosDetails").child("1").child(date).child("lat").setValue(location.getLatitude());
+                                databaseReference.child("sosDetails").child("1").child(date).child("lng").setValue(location.getLongitude());
+
+                                Dialog dialog = onCreateDialogSOS();
+                                dialog.show();
+                            }
+                        });
+
+                }
+
+                return false;
+            }
+        });
+
+        client = LocationServices.getFusedLocationProviderClient(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -73,64 +122,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        saveLocationBtn = findViewById(R.id.floating_action_button);
+        saveLocationBtn = findViewById(R.id.save_location_btn);
+        lastSavedSpotBtn = findViewById(R.id.find_last_spot);
 
         saveLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                databaseReference.child("parkedLocation").child("1").child("lat").setValue(userLat);
-                databaseReference.child("parkedLocation").child("1").child("lng").setValue(userLng);
 
-                Dialog dialog = onCreateDialogEdited();
-                dialog.show();
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+
+                client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if(location != null){
+                            Log.d("Location", "onSuccess: Latitude " + location.getLatitude() );
+                            userLat = location.getLatitude();
+                            userLng = location.getLongitude();
+                            databaseReference.child("parkedLocation").child("1").child("lat").setValue(userLat);
+                            databaseReference.child("parkedLocation").child("1").child("lng").setValue(userLng);
+
+                            Dialog dialog = onCreateDialogEdited("Parking spot saved");
+                            dialog.show();
+                        }
+                    }
+                });
 
             }
         });
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        LocationListener locationListener = new LocationListener() {
+        databaseReference.child("parkedLocation").child("1").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onLocationChanged(Location location) {
-                userLat = location.getLatitude();
-                userLng = location.getLongitude();
-                Log.d("devishan", "onLocationChanged: success");
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    lastSavedSpotBtn.setVisibility(View.GONE);
+                }
+                else
+                    lastSavedSpotBtn.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-                Log.d("devishan", "onStatusChanged: success");
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+
+        lastSavedSpotBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onProviderEnabled(String provider) {
-                Log.d("devishan", "onProviderEnabled: success");
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this,MapActivity.class));
             }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                Log.d("devishan", "onProviderDisabled: success");
-            }
-        };
-
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                0,
-                0, locationListener);
+        });
     }
 
 
-    private Dialog onCreateDialogEdited() {
+    private Dialog onCreateDialogEdited(String text) {
 
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.custom_dialog);
-        dialog.setCancelable(false);
+        dialog.setCancelable(true);
 
         TextView textView = dialog.findViewById(R.id.update_tv);
-        textView.setText("Parking spot saved");
+        textView.setText(text);
 
         Button continueBtn = dialog.findViewById(R.id.check_btn);
         continueBtn.setOnClickListener(new View.OnClickListener() {
@@ -144,4 +198,26 @@ public class MainActivity extends AppCompatActivity {
         return dialog;
     }
 
+    private Dialog onCreateDialogSOS() {
+
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_dialog);
+        dialog.setCancelable(true);
+
+        ImageView imageView = dialog.findViewById(R.id.comment_tv);
+        imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_sos));
+
+        TextView textView = dialog.findViewById(R.id.update_tv);
+        textView.setText("SOS Sent");
+
+        Button continueBtn = dialog.findViewById(R.id.check_btn);
+        continueBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        return dialog;
+    }
 }
