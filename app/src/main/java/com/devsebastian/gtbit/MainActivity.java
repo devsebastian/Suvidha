@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
                                 Item item = new Item();
                                 item.setId(id);
                                 item.setDeal(deal);
-                                Log.d
+//                                Log.d
                                 item.setTitle(dataSnapshot.child("name").getValue(String.class));
                                 item.setCost(dataSnapshot.child("Price").getValue(Integer.class));
                                 item.setImgUrl(dataSnapshot.child("imgurl").getValue(String.class));
