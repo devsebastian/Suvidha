@@ -38,11 +38,8 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -53,7 +50,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MainActivity extends AppCompatActivity{
 
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-    Button saveLocationBtn, lastSavedSpotBtn;
+    ImageView saveLocationBtn, lastSavedSpotBtn;
 
     private Double userLat = 0d, userLng = 0d;
 
