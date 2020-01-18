@@ -20,8 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".BillingActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".BillingActivity">
             <intent-filter android:label="dev">
                 <action android:name="android.intent.action.VIEW" />
 
