@@ -39,8 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/feed_recycler_view"
-                    android:nestedScrollingEnabled="false"
-                    />
+                    android:nestedScrollingEnabled="false" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
@@ -51,6 +50,7 @@
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:elevation="12dp"
+        android:backgroundTint="@color/colorPrimary"
         android:layout_height="wrap_content">
 
         <LinearLayout
@@ -62,6 +62,7 @@
                 android:layout_width="0dp"
                 android:src="@drawable/park"
                 android:layout_height="match_parent"
+                android:tint="@android:color/white"
                 android:padding="18dp"
                 android:foreground="?attr/selectableItemBackground"
                 android:id="@+id/save_location_btn"
@@ -72,6 +73,8 @@
                 android:src="@drawable/car_parking_lights"
                 android:layout_height="match_parent"
                 android:padding="18dp"
+                android:tint="@android:color/white"
+
                 android:foreground="?attr/selectableItemBackground"
 
                 android:id="@+id/find_last_spot"
@@ -84,17 +87,20 @@
 
             <ImageView
                 android:layout_width="0dp"
+                android:tint="@android:color/white"
                 android:src="@drawable/card"
                 android:foreground="?attr/selectableItemBackground"
-
                 android:layout_height="match_parent"
                 android:padding="18dp"
+                android:id="@+id/recent_bills"
                 android:layout_weight="1" />
 
             <ImageView
                 android:id="@+id/profile"
                 android:layout_width="0dp"
-                android:src="@drawable/account"
+                android:tint="@android:color/white"
+
+                android:src="@drawable/lifebuoy"
                 android:layout_height="match_parent"
                 android:foreground="?attr/selectableItemBackground"
                 android:padding="18dp"

@@ -6,17 +6,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -45,7 +41,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     int i = 0;
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-    ImageView saveLocationBtn, lastSavedSpotBtn, profileBtn;
+    ImageView saveLocationBtn, lastSavedSpotBtn, profileBtn, recentBills;
 
     String shopName;
 
@@ -55,15 +51,25 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, result.getContents(), Toast.LENGTH_SHORT).show();
                 if (result.getContents().startsWith("mall/")) {
                     stuff((result.getContents().replace("mall/", "")));
+                    FirebaseDatabase.getInstance().getReference().child("malls").child(result.getContents().replace("mall/", "")).child("name").addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            getSupportActionBar().setTitle(dataSnapshot.getValue(String.class));
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 } else {
                     Intent intent = new Intent(MainActivity.this, BillingActivity.class);
                     intent.putExtra("data", result.getContents());
@@ -81,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().invalidateOptionsMenu();
         toolbar.inflateMenu(R.menu.toolbar_menu);
 
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -88,25 +96,26 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.send_sos:
-                        final long date = System.currentTimeMillis();
-
-                        client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                databaseReference.child("sosDetails").child("1").child("date").setValue(date);
-                                databaseReference.child("sosDetails").child("1").child("lat").setValue(location.getLatitude());
-                                databaseReference.child("sosDetails").child("1").child("lng").setValue(location.getLongitude());
-
-                                Dialog dialog = onCreateDialogSOS();
-                                dialog.show();
-                            }
-                        });
+//                        final long date = System.currentTimeMillis();
+//
+//                        client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+//                            @Override
+//                            public void onSuccess(Location location) {
+//                                databaseReference.child("sosDetails").child("1").child("date").setValue(date);
+//                                databaseReference.child("sosDetails").child("1").child("lat").setValue(location.getLatitude());
+//                                databaseReference.child("sosDetails").child("1").child("lng").setValue(location.getLongitude());
+//
+//                                Dialog dialog = onCreateDialogSOS();
+//                                dialog.show();
+//                            }
+//                        });
 
                 }
 
                 return false;
             }
         });
+
 
         client = LocationServices.getFusedLocationProviderClient(this);
 
@@ -121,11 +130,33 @@ public class MainActivity extends AppCompatActivity {
         saveLocationBtn = findViewById(R.id.save_location_btn);
         lastSavedSpotBtn = findViewById(R.id.find_last_spot);
         profileBtn = findViewById(R.id.profile);
+        recentBills = findViewById(R.id.recent_bills);
+
+        recentBills.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, RecentBillsActivity.class));
+            }
+        });
 
         profileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                final long date = System.currentTimeMillis();
+
+                client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        databaseReference.child("sosDetails").child("1").child("date").setValue(date);
+                        databaseReference.child("sosDetails").child("1").child("lat").setValue(location.getLatitude());
+                        databaseReference.child("sosDetails").child("1").child("lng").setValue(location.getLongitude());
+
+                        Dialog dialog = onCreateDialogSOS();
+                        dialog.show();
+                    }
+                });
+
+//                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
             }
         });
 
@@ -182,6 +213,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.feed_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+
+        stuff("1");
     }
 
 

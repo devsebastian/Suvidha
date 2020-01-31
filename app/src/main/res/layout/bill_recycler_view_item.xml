@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="12dp"
-    android:padding="12dp"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:padding="12dp"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="Shop Name"
             android:textSize="18sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="@android:color/black" />
 
         <TextView
             android:id="@+id/bill_summary"
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:text="Bill Summary"
             android:textSize="16sp"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/darker_gray" />
 
     </LinearLayout>
 
